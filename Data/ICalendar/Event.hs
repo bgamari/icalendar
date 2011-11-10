@@ -1,6 +1,6 @@
 module Data.ICalendar.Event where
 
-import qualified Data.Text as T
+import Data.Text (Text)
 import Control.Monad (liftM, when, (<=<))
 import Data.Maybe (isNothing, fromJust, catMaybes)
 import Data.Time.CalendarTime
@@ -30,11 +30,10 @@ parseEvent localTz obj | icoName obj == "VEVENT" =
                                                            , iceRRule=rrule' }
 parseEvent _ _ = return Nothing
 
-readEvents :: FilePath -> IO [Event]
-readEvents fname =
-        do f <- readFile "basic.ics"
-           localTz <- getCurrentTimeZone
-           let Right ic = parseICal $ T.pack f
+readEvents :: Text -> IO [Event]
+readEvents content =
+        do localTz <- getCurrentTimeZone
+           let Right ic = parseICal content
                Just vcal = lookupObject ic "VCALENDAR"
            events <- mapM (parseEvent localTz) $ lookupObjects vcal "VEVENT"
            return $ catMaybes events
