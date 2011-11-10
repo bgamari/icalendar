@@ -17,6 +17,8 @@ import Data.ICalendar.RRule
 data Event = Event { iceStart :: CalendarTime
                    , iceEnd :: Maybe CalendarTime
                    , iceRRule :: Maybe RRule
+                   , iceSummary :: Maybe String
+                   , iceObject :: ICalObject
                    } deriving (Show, Eq)
 
 parseEvent :: TimeZone -> ICalObject -> IO (Maybe Event)
@@ -27,12 +29,15 @@ parseEvent localTz obj | icoName obj == "VEVENT" =
                    case dtstart of
                         Nothing -> return Nothing
                         Just d -> do let dtend = lookupProp obj "DTEND"
+                                         summary = lookupPropValue obj "SUMMARY"
                                      dtend' <- if isNothing dtend then return Nothing
                                                                   else parseDateTimeProp $ fromJust dtend
                                      rrule' <- parseRRule localTz obj
                                      return $ Just $ Event { iceStart=fromJust dtstart'
                                                            , iceEnd=dtend'
-                                                           , iceRRule=rrule' }
+                                                           , iceRRule=rrule'
+                                                           , iceSummary=summary
+                                                           , iceObject=obj }
 parseEvent _ _ = return Nothing
 
 readEvents :: Text -> IO [Event]
