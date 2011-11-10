@@ -189,7 +189,10 @@ buildSched rr
               f _ Nothing  = return
 
 recurrences :: RRule -> [UTCTime]
-recurrences rr = filterUntil $ filterCount $ r
+recurrences rr = recurrencesStarting rr (rDateStart rr)
+
+recurrencesStarting :: RRule -> CalendarTime -> [UTCTime]
+recurrencesStarting rr from = filterUntil $ filterCount $ r
         where period = case rFreq rr of 
                             Yearly      -> yearly
                             Monthly     -> monthly
@@ -199,17 +202,17 @@ recurrences rr = filterUntil $ filterCount $ r
                             Minutely    -> minutely
                             Secondly    -> secondly
 
-              fromCalTime = maybe (error "Failed to convert start time") id . fromCalendarTime
+              start = maybe (error "Failed to convert start time") id $ fromCalendarTime from
               r = recur period `withStartOfWeek` rWeekStart rr
                                `by` rInterval rr
-                               `starting` fromCalTime (rDateStart rr)
+                               `starting` start
                                $ buildSched rr
 
               filterUntil, filterCount :: [UTCTime] -> [UTCTime]
               filterUntil = case rUntil rr of
-                        Just d  -> takeWhile (<= fromCalTime d)
+                        Just d  -> takeWhile (<= ( maybe (error "Failed to convert until time") id
+                                                 $ fromCalendarTime d))
                         Nothing -> id
               filterCount = case rCount rr of
                          Just c  -> take c
                          Nothing -> id
-
