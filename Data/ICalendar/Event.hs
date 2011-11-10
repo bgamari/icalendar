@@ -1,4 +1,8 @@
-module Data.ICalendar.Event where
+module Data.ICalendar.Event ( Event(..)
+                            , parseEvent
+                            , readEvents
+                            , occurrences
+                            ) where
 
 import Data.Text (Text)
 import Control.Monad (liftM, when, (<=<))
