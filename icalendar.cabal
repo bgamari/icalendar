@@ -56,5 +56,6 @@ Library
   -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
   -- Build-tools:         
   
-Executable Hi
-  Main-is:             Hi.hs
+--Executable ICalTest
+--  Main-is:             ICalTest.hs
+
