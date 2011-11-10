@@ -4,6 +4,7 @@ import Data.Text (Text)
 import Control.Monad (liftM, when, (<=<))
 import Data.Maybe (isNothing, fromJust, catMaybes)
 import Data.Time.CalendarTime
+import Data.Time.Clock (UTCTime)
 import Data.Time.LocalTime
 import Data.ICalendar.Types
 import Data.ICalendar.Parse
@@ -37,4 +38,8 @@ readEvents content =
                Just vcal = lookupObject ic "VCALENDAR"
            events <- mapM (parseEvent localTz) $ lookupObjects vcal "VEVENT"
            return $ catMaybes events
+
+occurrences :: Event -> [UTCTime]
+occurrences ev@(Event {iceRRule=Just rrule}) = recurrences rrule
+occurrences ev = [maybe (error "Failed to convert start time") id $ fromCalendarTime $ iceStart ev]
 
